@@ -5,20 +5,37 @@ Thank you for taking a look at my script! This is fairly straightforward and inc
 Commands:
 
 /realweather [on/off] turns realweather on or off in game, and on the fly. 
+
 /weather help - displays a list of all commands for weather.
+
 /Weather [weather condition] - sets the weather to your desired condition. If real weather is on, it will turn it off. If you turn real weather on while using a /weather command, it will switch back to using IRL weather. 
+
+
 
 Possible weather options
 
-  clear = "Clear sky, sunny weather.",
-  extrasunny = "Very clear and bright sunny weather.",
-  clouds = "Partly cloudy skies.",
-  overcast = "Cloudy and gray sky.",
-  rain = "Rainy weather with wet roads.",
-  clearing = "Rain clearing up, clouds breaking.",
-  thunder = "Thunderstorms with heavy rain.",
-  smog = "Low visibility due to smog.",
-  foggy = "Fog reducing visibility.",
-  snowlight = "Light snow falling.",
-  snow = "Moderate snow weather.",
-  blizzard = "Heavy snowstorm with blizzard conditions."
+
+
+clear = "Clear sky, sunny weather.",
+
+extrasunny = "Very clear and bright sunny weather.",
+
+clouds = "Partly cloudy skies.",
+
+overcast = "Cloudy and gray sky.",
+
+rain = "Rainy weather with wet roads.",
+
+clearing = "Rain clearing up, clouds breaking.",
+
+thunder = "Thunderstorms with heavy rain.",
+
+smog = "Low visibility due to smog.",
+
+foggy = "Fog reducing visibility.",
+
+snowlight = "Light snow falling.",
+
+snow = "Moderate snow weather.",
+
+blizzard = "Heavy snowstorm with blizzard conditions."
