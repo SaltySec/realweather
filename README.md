@@ -10,7 +10,7 @@ Thank you for taking a look at my script! This is fairly straightforward and inc
 
 ``/Weather [weather condition]`` - sets the weather to your desired condition. If real weather is on, it will turn it off. If you turn real weather on while using a /weather command, it will switch back to using IRL weather. 
 
-##Possible weather options
+## Possible weather options
 
 ``clear`` = "Clear sky, sunny weather.",
 
