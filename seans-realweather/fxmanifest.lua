@@ -1,8 +1,8 @@
 fx_version 'cerulean'
 game 'gta5'
 
-author 'YourName'
-description 'Real-world weather sync with commands & multi-phone support'
+author 'Sean'
+description 'Real-world weather sync with commands'
 version '1.4.0'
 
 server_script 'config.lua'
