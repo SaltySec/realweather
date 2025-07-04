@@ -35,3 +35,9 @@ Thank you for taking a look at my script! This is fairly straightforward and inc
 ``snow`` = "Moderate snow weather.",
 
 ``blizzard`` = "Heavy snowstorm with blizzard conditions."
+
+## Configuring
+
+To set the city and county, just adjust those lines in the config.lua. Line 4 is the City, and line 5 is the start. Currently set to "Los Angeles, US"
+
+To adjust how frequently this updates, change Config.UpdateInterval = [Desired Value]. The value is in seconds. Please do **not** update more frequently than 60 seconds, otherwise the script will stop working at the end of every hour. 
