@@ -2,40 +2,36 @@
 
 Thank you for taking a look at my script! This is fairly straightforward and includes commands to overwrite the real weather implementaiton on the fly. This script utilizes the open weather maps API and does a call to check for weather updates every minute. 
 
-Commands:
+## Commands:
 
-/realweather [on/off] turns realweather on or off in game, and on the fly. 
+``/realweather [on/off]`` turns realweather on or off in game, and on the fly. 
 
-/weather help - displays a list of all commands for weather.
+``/weather help`` - displays a list of all commands for weather.
 
-/Weather [weather condition] - sets the weather to your desired condition. If real weather is on, it will turn it off. If you turn real weather on while using a /weather command, it will switch back to using IRL weather. 
+``/Weather [weather condition]`` - sets the weather to your desired condition. If real weather is on, it will turn it off. If you turn real weather on while using a /weather command, it will switch back to using IRL weather. 
 
+##Possible weather options
 
+``clear`` = "Clear sky, sunny weather.",
 
-Possible weather options
+``extrasunny`` = "Very clear and bright sunny weather.",
 
+``clouds`` = "Partly cloudy skies.",
 
+``overcast`` = "Cloudy and gray sky.",
 
-clear = "Clear sky, sunny weather.",
+``rain`` = "Rainy weather with wet roads.",
 
-extrasunny = "Very clear and bright sunny weather.",
+``clearing`` = "Rain clearing up, clouds breaking.",
 
-clouds = "Partly cloudy skies.",
+``thunder`` = "Thunderstorms with heavy rain.",
 
-overcast = "Cloudy and gray sky.",
+``smog`` = "Low visibility due to smog.",
 
-rain = "Rainy weather with wet roads.",
+``foggy`` = "Fog reducing visibility.",
 
-clearing = "Rain clearing up, clouds breaking.",
+``snowlight`` = "Light snow falling.",
 
-thunder = "Thunderstorms with heavy rain.",
+``snow`` = "Moderate snow weather.",
 
-smog = "Low visibility due to smog.",
-
-foggy = "Fog reducing visibility.",
-
-snowlight = "Light snow falling.",
-
-snow = "Moderate snow weather.",
-
-blizzard = "Heavy snowstorm with blizzard conditions."
+``blizzard`` = "Heavy snowstorm with blizzard conditions."
