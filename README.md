@@ -8,7 +8,7 @@ Thank you for taking a look at my script! This is fairly straightforward and inc
 
 ``/weather help`` - displays a list of all commands for weather.
 
-``/Weather [weather condition]`` - sets the weather to your desired condition. If real weather is on, it will turn it off. If you turn real weather on while using a /weather command, it will switch back to using IRL weather. 
+``/weather [weather condition]`` - sets the weather to your desired condition. If real weather is on, it will turn it off. If you turn real weather on while using a /weather command, it will switch back to using IRL weather. 
 
 ## Possible weather options
 
