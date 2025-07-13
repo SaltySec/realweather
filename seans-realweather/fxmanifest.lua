@@ -2,10 +2,8 @@ fx_version 'cerulean'
 game 'gta5'
 
 author 'Sean'
-description 'Real-world weather sync with commands'
-version '1.4.0'
+description 'Real-world weather sync'
 
-server_script 'config.lua'
-client_script 'config.lua'
-server_script 'server.lua'
+shared_script 'config.lua'
 client_script 'client.lua'
+server_script 'server.lua'

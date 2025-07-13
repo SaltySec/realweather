@@ -3,6 +3,7 @@ local apiKey = Config.ApiKey
 local isRealWeatherEnabled = Config.RealWeather
 local useFahrenheit = Config.UseFahrenheit
 
+-- Valid weather types
 local validWeathers = {
     clear = "Clear sky, sunny weather.",
     extrasunny = "Very clear and bright sunny weather.",
@@ -15,13 +16,98 @@ local validWeathers = {
     foggy = "Fog reducing visibility.",
     snowlight = "Light snow falling.",
     snow = "Moderate snow weather.",
-    blizzard = "Heavy snowstorm with blizzard conditions."
+    blizzard = "Heavy snowstorm with blizzard conditions.",
+    xmas = "Festive snow-covered ground.",
+    snow_halloween = "Halloween with snow.",
+    rain_halloween = "Halloween with rain.",
+    halloween = "Spooky weather for Halloween.",
+    neutral = "Neutral clear sky."
 }
 
+-- Notify helper
 local function notifyPlayer(src, message, type, length)
     TriggerClientEvent('QBCore:Notify', src, message, type or 'primary', length or 10000)
 end
 
+-- /realweather command
+RegisterCommand('realweather', function(source, args)
+    local src, sub = source, args[1]
+    if not sub then
+        notifyPlayer(src, '/realweather [on/off]', 'primary')
+        return
+    end
+
+    if sub == 'on' then
+        isRealWeatherEnabled = true
+        TriggerClientEvent('rw:disableManualWeather', -1)
+        notifyPlayer(src, 'Real-world weather enabled.', 'success')
+        fetchWeather()
+    elseif sub == 'off' then
+        isRealWeatherEnabled = false
+        notifyPlayer(src, 'Real-world weather disabled. Use /weather to set manually.', 'success')
+    else
+        notifyPlayer(src, '/realweather [on/off]', 'primary')
+    end
+end, true)
+
+-- /weather command
+RegisterCommand("weather", function(source, args)
+    local src = source
+    local sub = args[1] and args[1]:lower()
+
+    if not sub then
+        notifyPlayer(src, "Usage: /weather [type] or /weather help", "error")
+        return
+    end
+
+    if sub == "help" then
+        local helpMessage = "Valid weather types:\n"
+        for k, desc in pairs(validWeathers) do
+            helpMessage = helpMessage .. string.upper(k) .. " - " .. desc .. "\n"
+        end
+        TriggerClientEvent("chat:addMessage", src, {
+            color = {255, 255, 0},
+            multiline = true,
+            args = {"Weather Help", helpMessage}
+        })
+        return
+    end
+
+    if validWeathers[sub] then
+        isRealWeatherEnabled = false
+        TriggerClientEvent("rw:setWeather", -1, sub)
+        notifyPlayer(src, "Weather changed to: " .. string.upper(sub), "success")
+    else
+        notifyPlayer(src, "Invalid weather type. Use /weather help to list options.", "error")
+    end
+end, true)
+
+-- Time until next restart in minutes
+function minutesUntilNextRestart()
+    local now = os.date("*t")
+    local currentMinutes = now.hour * 60 + now.min
+    local nextRestartMinutes = nil
+
+    for _, time in ipairs(Config.RestartTimesLocal) do
+        local hour = time.hour or 0
+        local minute = time.minute or 0
+        local restartMinutes = hour * 60 + minute
+
+        if restartMinutes > currentMinutes then
+            nextRestartMinutes = restartMinutes
+            break
+        end
+    end
+
+    if not nextRestartMinutes and #Config.RestartTimesLocal > 0 then
+        local first = Config.RestartTimesLocal[1]
+        nextRestartMinutes = (24 * 60) + ((first.hour or 0) * 60 + (first.minute or 0))
+    end
+
+    return nextRestartMinutes - currentMinutes
+end
+
+-- Convert OpenWeather to GTA
 local function mapOpenWeatherToFiveM(weatherMain, weatherDesc)
     weatherMain = weatherMain:lower()
     weatherDesc = weatherDesc:lower()
@@ -61,8 +147,14 @@ local function mapOpenWeatherToFiveM(weatherMain, weatherDesc)
     end
 end
 
-local function fetchWeather()
+-- Fetch weather from OpenWeather API
+function fetchWeather()
     if not isRealWeatherEnabled then return end
+
+    local minsLeft = minutesUntilNextRestart()
+    if minsLeft <= Config.DisableWeatherBeforeStormMinutes then
+        return
+    end
 
     local units = useFahrenheit and 'imperial' or 'metric'
     local url = string.format(
@@ -100,60 +192,10 @@ local function fetchWeather()
     end, 'GET', '', { ['Content-Type'] = 'application/json' })
 end
 
+-- Poll loop
 Citizen.CreateThread(function()
     while true do
         fetchWeather()
         Citizen.Wait(Config.UpdateInterval * 1000)
     end
-end)
-
-RegisterCommand('realweather', function(source, args)
-    local src, sub = source, args[1]
-    if not sub then
-        notifyPlayer(src, '/realweather [on/off]', 'primary')
-        return
-    end
-    if sub == 'on' then
-        isRealWeatherEnabled = true
-        TriggerClientEvent('rw:disableManualWeather', -1)
-        notifyPlayer(src, 'Real-world weather enabled.', 'success')
-        fetchWeather()
-    elseif sub == 'off' then
-        isRealWeatherEnabled = false
-        notifyPlayer(src, 'Real-world weather disabled. Use /weather to set manually.', 'success')
-    else
-        notifyPlayer(src, '/realweather [on/off]', 'primary')
-    end
-end, true)
-
-RegisterCommand('weather', function(source, args)
-    local src, sub = source, args[1]
-    if not sub then
-        notifyPlayer(src, 'Usage: /weather [option] or /weather help', 'primary')
-        return
-    end
-    sub = sub:lower()
-    if sub == "help" then
-        notifyPlayer(src, "Available weather types:", 'primary', 15000)
-        for k,v in pairs(validWeathers) do
-            notifyPlayer(src, string.format("- %s: %s", k, v), 'primary', 15000)
-            Citizen.Wait(50)
-        end
-        return
-    end
-    if not validWeathers[sub] then
-        notifyPlayer(src, 'The weather option you selected does not exist! Use /weather help.', 'error')
-        return
-    end
-    isRealWeatherEnabled = false
-    TriggerClientEvent('rw:enableManualWeather', -1, sub:upper())
-    notifyPlayer(src, 'Weather manually set to: '..sub, 'success')
-end, true)
-
-RegisterNetEvent('rw:toggleUnit')
-AddEventHandler('rw:toggleUnit', function()
-    local src = source
-    useFahrenheit = not useFahrenheit
-    notifyPlayer(src, 'Unit now: ' .. (useFahrenheit and "Fahrenheit" or "Celsius"), 'success')
-    fetchWeather()
 end)
