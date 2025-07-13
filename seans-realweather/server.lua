@@ -24,6 +24,50 @@ local validWeathers = {
     neutral = "Neutral clear sky."
 }
 
+
+local isInRestartOverride = false
+
+local function getMinutesUntilNextRestart()
+    local now = os.date("*t")
+    local currentMinutes = now.hour * 60 + now.min
+    local minDiff = nil
+
+    for _, restart in ipairs(Config.RestartTimesLocal) do
+        local restartMinutes = restart.hour * 60 + restart.minute
+        local diff = restartMinutes - currentMinutes
+        if diff < 0 then diff = diff + 1440 end  -- handle wrap around to next day
+        if not minDiff or diff < minDiff then
+            minDiff = diff
+        end
+    end
+
+    return minDiff
+end
+
+local function checkRestartOverride()
+    local minutes = getMinutesUntilNextRestart()
+
+    if minutes <= 20 then
+        isInRestartOverride = true
+
+        if minutes <= 5 then
+            print("[RealWeather] Server restart in <= 5 minutes. Applying thunder")
+            TriggerClientEvent('rw:setWeather', -1, 'thunder')
+        elseif minutes <= 10 then
+            print("[RealWeather] Server restart in <= 10 minutes. Applying rain")
+            TriggerClientEvent('rw:setWeather', -1, 'rain')
+        elseif minutes <= 15 then
+            print("[RealWeather] Server restart in <= 15 minutes. Applying overcast")
+            TriggerClientEvent('rw:setWeather', -1, 'overcast')
+        elseif minutes <= 20 then
+            print("[RealWeather] Server restart in <= 20 minutes. Applying clouds")
+            TriggerClientEvent('rw:setWeather', -1, 'clouds')
+        end
+    else
+        isInRestartOverride = false
+    end
+end
+
 -- Notify helper
 local function notifyPlayer(src, message, type, length)
     TriggerClientEvent('QBCore:Notify', src, message, type or 'primary', length or 10000)
@@ -55,6 +99,11 @@ RegisterCommand("weather", function(source, args)
     local src = source
     local sub = args[1] and args[1]:lower()
 
+    if isInRestartOverride then
+    print("[RealWeather] Override active — skipping real weather update.")
+    return
+end
+
     if not sub then
         notifyPlayer(src, "Usage: /weather [type] or /weather help", "error")
         return
@@ -81,31 +130,6 @@ RegisterCommand("weather", function(source, args)
         notifyPlayer(src, "Invalid weather type. Use /weather help to list options.", "error")
     end
 end, true)
-
--- Time until next restart in minutes
-function minutesUntilNextRestart()
-    local now = os.date("*t")
-    local currentMinutes = now.hour * 60 + now.min
-    local nextRestartMinutes = nil
-
-    for _, time in ipairs(Config.RestartTimesLocal) do
-        local hour = time.hour or 0
-        local minute = time.minute or 0
-        local restartMinutes = hour * 60 + minute
-
-        if restartMinutes > currentMinutes then
-            nextRestartMinutes = restartMinutes
-            break
-        end
-    end
-
-    if not nextRestartMinutes and #Config.RestartTimesLocal > 0 then
-        local first = Config.RestartTimesLocal[1]
-        nextRestartMinutes = (24 * 60) + ((first.hour or 0) * 60 + (first.minute or 0))
-    end
-
-    return nextRestartMinutes - currentMinutes
-end
 
 -- Convert OpenWeather to GTA
 local function mapOpenWeatherToFiveM(weatherMain, weatherDesc)
@@ -149,9 +173,14 @@ end
 
 -- Fetch weather from OpenWeather API
 function fetchWeather()
+    if isInRestartOverride then
+    print("[RealWeather] Override active — skipping real weather update.")
+    return
+end
+
     if not isRealWeatherEnabled then return end
 
-    local minsLeft = minutesUntilNextRestart()
+    local minsLeft = getMinutesUntilNextRestart()
     if minsLeft <= Config.DisableWeatherBeforeStormMinutes then
         return
     end
@@ -183,6 +212,7 @@ function fetchWeather()
 
                 print(('[RealWeather] Updated: %s°%s | %s | GTA: %s'):format(
                     tostring(temperature), useFahrenheit and "F" or "C", weatherDesc, gtaWeather))
+                print("[RealWeather] Current local time: " .. os.date("%Y-%m-%d %H:%M:%S"))
             else
                 print("[RealWeather] Failed to parse API data.")
             end
@@ -195,6 +225,7 @@ end
 -- Poll loop
 Citizen.CreateThread(function()
     while true do
+        checkRestartOverride()
         fetchWeather()
         Citizen.Wait(Config.UpdateInterval * 1000)
     end
